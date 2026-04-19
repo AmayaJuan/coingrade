@@ -4,16 +4,13 @@ plugins {
 
 android {
     namespace 'com.deltaforce.coingrade'
-    compileSdk {
-        version = release(37) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk 37
 
     defaultConfig {
         applicationId "com.deltaforce.coingrade"
         minSdk 24
-        targetSdk 36
+        //noinspection TargetSdkUpdate
+        targetSdk 37
         versionCode 1
         versionName "1.0"
 
