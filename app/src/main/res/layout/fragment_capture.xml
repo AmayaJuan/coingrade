@@ -34,12 +34,11 @@
 
     <FrameLayout
         android:id="@+id/preview_round_container"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="12dp"
-        android:layout_weight="1"
-        android:background="#0D0D12"
-        android:minHeight="200dp">
+        android:background="#0D0D12">
 
         <androidx.camera.view.PreviewView
             android:id="@+id/preview_view"
@@ -50,7 +49,7 @@
             android:id="@+id/ring_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/transparent" />
+            android:background="@drawable/coin_overlay_border" />
 
     </FrameLayout>
 
