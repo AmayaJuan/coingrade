@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#FFFFFF</color>
+
+    <color name="purple_500">#534AB7</color>
+    <color name="purple_700">#3C3489</color>
+    <color name="purple_100">#EEEDFE</color>
+    <color name="green_700">#0F6E56</color>
+    <color name="surface">#FAFAFA</color>
+    <color name="ink">#1A1A2E</color>
+    <color name="muted">#5F5E5A</color>
+
+</resources>

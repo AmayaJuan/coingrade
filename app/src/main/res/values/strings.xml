@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">CoinGrade</string>
+    <string name="start_eval">Comenzar evaluación</string>
+    <string name="history">Historial</string>
+    <string name="capture_title">Captura</string>
+    <string name="coin_name_hint">Nombre (ej: 50 centavos 1966)</string>
+    <string name="open_camera">Abrir cámara</string>
+    <string name="take_photo">Tomar foto</string>
+    <string name="analyzing">Analizando...</string>
+    <string name="new_eval">Nueva evaluación</string>
+    <string name="coin_default">Moneda sin nombre</string>
+    <string name="result_vp_fmt">≈ %d%% valor orientativo</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="no">No hay evaluaciones aún</string>
+    <string name="coin">🪙</string>
+    <string name="evaluate_currency">Evalúa tu moneda</string>
+    <string name="iIndicative_classification">Clasificación orientativa: captura anverso y reverso</string>
+</resources>

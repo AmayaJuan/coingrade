@@ -1,0 +1,51 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'com.deltaforce.coingrade'
+    compileSdk {
+        version = release(36) {
+            minorApiLevel = 1
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.deltaforce.coingrade"
+        minSdk 24
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    buildFeatures {
+        viewBinding true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation libs.appcompat.v170
+    implementation libs.material.v1120
+    implementation libs.constraintlayout.v220
+    implementation libs.fragment
+    implementation libs.navigation.fragment
+    implementation libs.navigation.ui
+    implementation libs.camera.core
+    implementation libs.camera.camera2
+    implementation libs.camera.lifecycle
+    implementation libs.camera.view.v141
+    implementation libs.recyclerview
+
+}
