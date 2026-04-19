@@ -5,7 +5,9 @@
     <string name="capture_title">Captura</string>
     <string name="coin_name_hint">Nombre (ej: 50 centavos 1966)</string>
     <string name="open_camera">Abrir cámara</string>
-    <string name="take_photo">Tomar foto</string>
+    <string name="take_photo">Tomar foto (%d/6)</string>
+    <string name="photo_obverse">Lado Anverso: Foto %d de 3</string>
+    <string name="photo_reverse">Lado Reverso: Foto %d de 3</string>
     <string name="analyzing">Analizando...</string>
     <string name="new_eval">Nueva evaluación</string>
     <string name="coin_default">Moneda sin nombre</string>

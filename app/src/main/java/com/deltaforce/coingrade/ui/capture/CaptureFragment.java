@@ -39,6 +39,8 @@ public class CaptureFragment extends Fragment {
     private FragmentCaptureBinding binding;
     private ImageCapture imageCapture;
     private final ExecutorService cameraExecutor = Executors.newSingleThreadExecutor();
+    private int photoCount = 0;
+    private static final int TOTAL_PHOTOS = 6;
 
     private final ActivityResultLauncher<String> permissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
@@ -73,7 +75,21 @@ public class CaptureFragment extends Fragment {
         else
             permissionLauncher.launch(Manifest.permission.CAMERA);
 
+        updateUI();
         binding.btnCapture.setOnClickListener(v -> takePhoto());
+    }
+
+    private void updateUI() {
+        if (binding == null) return;
+        
+        int currentInSide = (photoCount % 3) + 1;
+        if (photoCount < 3) {
+            binding.txtInstructions.setText(getString(R.string.photo_obverse, currentInSide));
+        } else {
+            binding.txtInstructions.setText(getString(R.string.photo_reverse, currentInSide));
+        }
+        
+        binding.btnCapture.setText(getString(R.string.take_photo, photoCount + 1));
     }
 
     private void startCamera() {
@@ -106,38 +122,68 @@ public class CaptureFragment extends Fragment {
     private void takePhoto() {
         if (imageCapture == null || binding == null) return;
 
-        String name = "";
-        if (binding.editCoinName.getText() != null)
-            name = binding.editCoinName.getText().toString().trim();
+        binding.btnCapture.setEnabled(false);
 
-        if (name.isEmpty())
-            name = getString(R.string.coin_default);
-
-        final String coinName = name;
         imageCapture.takePicture(ContextCompat.getMainExecutor(requireContext()),
                 new ImageCapture.OnImageCapturedCallback() {
                     @Override
                     public void onCaptureSuccess(@NonNull androidx.camera.core.ImageProxy image) {
                         image.close();
-                        GradeOption g = GradeCatalog.randomGrade();
-                        HistoryRepository.add(requireContext(), coinName, g.code, g.vp);
+                        photoCount++;
 
-                        Bundle b = new Bundle();
-                        b.putString("coinName", coinName);
-                        b.putString("gradeCode", g.code);
-                        b.putString("gradeName", g.displayName);
-                        b.putInt("vp", g.vp);
-
-                        requireActivity().runOnUiThread(() ->
-                                Navigation.findNavController(binding.getRoot())
-                                        .navigate(R.id.action_capture_to_result, b));
+                        if (photoCount >= TOTAL_PHOTOS) {
+                            performAnalysis();
+                        } else {
+                            requireActivity().runOnUiThread(() -> {
+                                updateUI();
+                                binding.btnCapture.setEnabled(true);
+                            });
+                        }
                     }
 
                     @Override
                     public void onError(@NonNull ImageCaptureException exception) {
                         exception.printStackTrace();
+                        requireActivity().runOnUiThread(() -> binding.btnCapture.setEnabled(true));
                     }
                 });
+    }
+
+    private void performAnalysis() {
+        if (binding == null) return;
+
+        // Mostrar estado de "Analizando" en la UI
+        requireActivity().runOnUiThread(() -> {
+            binding.btnCapture.setEnabled(false);
+            binding.txtInstructions.setText(getString(R.string.analyzing));
+            binding.btnCapture.setText(getString(R.string.analyzing));
+        });
+
+        // Simulación de procesamiento de las 6 imágenes (2 segundos)
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (binding == null) return;
+
+            String name = "";
+            if (binding.editCoinName.getText() != null)
+                name = binding.editCoinName.getText().toString().trim();
+
+            if (name.isEmpty())
+                name = getString(R.string.coin_default);
+
+            final String coinName = name;
+            
+            GradeOption g = GradeCatalog.randomGrade();
+            HistoryRepository.add(requireContext(), coinName, g.code, g.vp);
+
+            Bundle b = new Bundle();
+            b.putString("coinName", coinName);
+            b.putString("gradeCode", g.code);
+            b.putString("gradeName", g.displayName);
+            b.putInt("vp", g.vp);
+
+            Navigation.findNavController(binding.getRoot())
+                    .navigate(R.id.action_capture_to_result, b);
+        }, 2500);
     }
 
     @Override

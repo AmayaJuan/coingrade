@@ -18,9 +18,18 @@ import java.util.Locale;
 
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.VH> {
 
+    public interface OnDeleteListener {
+        void onDelete(HistoryRepository.Entry entry);
+    }
+
     private final List<HistoryRepository.Entry> items = new ArrayList<>();
     private final DateFormat dateFormat =
             DateFormat.getDateInstance(DateFormat.MEDIUM, new Locale("es", "CO"));
+    private final OnDeleteListener deleteListener;
+
+    public HistoryAdapter(OnDeleteListener deleteListener) {
+        this.deleteListener = deleteListener;
+    }
 
     @NonNull
     @Override
@@ -37,6 +46,11 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.VH> {
         holder.binding.itemName.setText(e.coinName);
         holder.binding.itemVp.setText(e.vp + "%");
         holder.binding.itemDate.setText(dateFormat.format(new Date(e.dateMs)));
+        holder.binding.btnDelete.setOnClickListener(v -> {
+            if (deleteListener != null) {
+                deleteListener.onDelete(e);
+            }
+        });
     }
 
     @Override

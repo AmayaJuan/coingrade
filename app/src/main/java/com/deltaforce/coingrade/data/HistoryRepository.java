@@ -59,6 +59,26 @@ public class HistoryRepository {
         sp.edit().putString(KEY, next.toString()).apply();
     }
 
+    public static void remove(Context context, long dateMs) {
+        SharedPreferences sp = context.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        JSONArray arr;
+        try {
+            arr = new JSONArray(sp.getString(KEY, "[]"));
+        } catch (JSONException e) {
+            return;
+        }
+        JSONArray next = new JSONArray();
+        for (int i = 0; i < arr.length(); i++) {
+            try {
+                JSONObject o = arr.getJSONObject(i);
+                if (o.optLong("t", 0) != dateMs) {
+                    next.put(o);
+                }
+            } catch (JSONException ignored) {}
+        }
+        sp.edit().putString(KEY, next.toString()).apply();
+    }
+
     public static List<Entry> getAll(Context context) {
         SharedPreferences sp = context.getApplicationContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         JSONArray arr;

@@ -57,6 +57,16 @@
             android:textColor="@color/muted"
             android:textSize="13sp"/>
 
+        <ImageButton
+            android:id="@+id/btn_delete"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Eliminar"
+            android:src="@android:drawable/ic_menu_delete"
+            app:tint="@color/muted" />
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

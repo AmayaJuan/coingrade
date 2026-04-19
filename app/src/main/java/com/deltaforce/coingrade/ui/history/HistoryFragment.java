@@ -32,7 +32,10 @@ public class HistoryFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        adapter = new HistoryAdapter();
+        adapter = new HistoryAdapter(entry -> {
+            HistoryRepository.remove(requireContext(), entry.dateMs);
+            refresh();
+        });
         binding.recycler.setAdapter(adapter);
         binding.btnNewFromHistory.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.action_history_to_capture));
