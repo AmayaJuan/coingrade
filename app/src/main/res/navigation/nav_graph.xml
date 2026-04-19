@@ -21,8 +21,25 @@
         android:name="com.deltaforce.coingrade.ui.capture.CaptureFragment"
         android:label="@string/capture_title">
         <action
-            android:id="@+id/action_capture_to_result"
+            android:id="@+id/action_capture_to_verification"
+            app:destination="@id/verificationFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/verificationFragment"
+        android:name="com.deltaforce.coingrade.ui.verification.VerificationFragment"
+        android:label="@string/verification_title">
+        <argument
+            android:name="coinName"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_verification_to_result"
             app:destination="@id/resultFragment" />
+        <action
+            android:id="@+id/action_verification_to_capture"
+            app:destination="@id/captureFragment"
+            app:popUpTo="@id/captureFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment

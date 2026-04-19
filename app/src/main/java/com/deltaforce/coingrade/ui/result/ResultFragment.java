@@ -30,13 +30,15 @@ public class ResultFragment extends Fragment {
         Bundle args = getArguments();
         if (args == null) return;
 
+        String name = args.getString("coinName", "");
         String code = args.getString("gradeCode", "-");
         String gName = args.getString("gradeName", "");
         int vp = args.getInt("vp", 0);
 
+        binding.textCoinName.setText(name);
         binding.textGradeCode.setText(code);
         binding.textGradeName.setText(gName);
-        binding.textVp.setText(getString(R.string.result_vp_fmt, vp));
+        binding.textVp.setText(getString(R.string.grade_value_fmt, vp));
 
         binding.btnNew.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.action_result_to_home));
