@@ -2,6 +2,9 @@ package com.deltaforce.coingrade.ui.capture;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Outline;
 import android.os.Bundle;
 
@@ -17,6 +20,8 @@ import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import java.nio.ByteBuffer;
 import android.graphics.Color;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.core.content.ContextCompat;
@@ -138,51 +143,65 @@ public class CaptureFragment extends Fragment {
     }
 
     private void analyzeImage(ImageProxy image) {
+        // En un caso real, aquí usaríamos un modelo de TensorFlow Lite (.tflite)
+        // para clasificar si hay una moneda en el centro del círculo.
+        
         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
         byte[] data = new byte[buffer.remaining()];
         buffer.get(data);
 
-        // Calculamos la varianza de los píxeles en el centro para detectar "textura"
-        // Una moneda tiene muchos relieves y detalles, una superficie lisa no.
+        // Algoritmo de detección mejorado (Simulación de IA más estricta)
+        // Analizamos el contraste y la distribución de bordes en el centro.
         long sum = 0;
         long sumSq = 0;
         int count = 0;
         
-        // Saltamos píxeles para procesar rápido (solo el centro)
-        int step = 10; 
-        for (int i = 0; i < data.length; i += step) {
-            int pixel = data[i] & 0xFF;
-            sum += pixel;
-            sumSq += (long) pixel * pixel;
-            count++;
+        int width = image.getWidth();
+        int height = image.getHeight();
+        
+        // Solo analizamos el centro de la imagen
+        int centerX = width / 2;
+        int centerY = height / 2;
+        int radius = Math.min(width, height) / 4;
+
+        for (int y = centerY - radius; y < centerY + radius; y += 10) {
+            for (int x = centerX - radius; x < centerX + radius; x += 10) {
+                int index = y * width + x;
+                if (index >= 0 && index < data.length) {
+                    int pixel = data[index] & 0xFF;
+                    sum += pixel;
+                    sumSq += (long) pixel * pixel;
+                    count++;
+                }
+            }
         }
 
-        double avg = (double) sum / count;
-        double variance = ((double) sumSq / count) - (avg * avg);
+        boolean detected = false;
+        if (count > 0) {
+            double avg = (double) sum / count;
+            double variance = ((double) sumSq / count) - (avg * avg);
 
-        // Umbral de detección: 
-        // Si la varianza es muy baja (liso) o está muy oscuro/muy brillante, no hay moneda.
-        boolean detected = variance > 400 && avg > 40 && avg < 220;
+            // Una moneda tiene detalles metálicos que generan varianza alta (textura)
+            // pero no debe ser un ruido blanco aleatorio.
+            // Ajustamos los umbrales para ser más exigentes.
+            detected = variance > 600 && variance < 5000 && avg > 60 && avg < 200;
+        }
 
+        final boolean isDetected = detected;
         requireActivity().runOnUiThread(() -> {
             if (binding != null) {
-                if (detected) {
-                    // Círculo Dorado si detecta moneda
+                if (isDetected) {
                     binding.ringOverlay.setBackgroundResource(R.drawable.coin_overlay_border);
                     binding.btnCapture.setEnabled(photoCount < TOTAL_PHOTOS);
                     binding.btnCapture.setAlpha(1.0f);
-                    if (!isCoinDetected) {
-                        // Opcional: una pequeña vibración o cambio de texto
-                        binding.txtInstructions.setTextColor(Color.parseColor("#FFD700"));
-                    }
+                    binding.txtInstructions.setTextColor(Color.parseColor("#FFD700"));
                 } else {
-                    // Círculo Rojo semi-transparente si no detecta moneda
-                    binding.ringOverlay.setBackgroundColor(Color.parseColor("#44FF0000"));
+                    binding.ringOverlay.setBackgroundColor(Color.parseColor("#66FF0000"));
                     binding.btnCapture.setEnabled(false);
                     binding.btnCapture.setAlpha(0.3f);
                     binding.txtInstructions.setTextColor(Color.WHITE);
                 }
-                isCoinDetected = detected;
+                isCoinDetected = isDetected;
             }
         });
         image.close();
@@ -197,17 +216,20 @@ public class CaptureFragment extends Fragment {
                 new ImageCapture.OnImageCapturedCallback() {
                     @Override
                     public void onCaptureSuccess(@NonNull androidx.camera.core.ImageProxy image) {
+                        Bitmap bitmap = imageProxyToBitmap(image);
                         image.close();
+                        
                         photoCount++;
 
-                        if (photoCount >= TOTAL_PHOTOS) {
-                            performAnalysis();
-                        } else {
-                            requireActivity().runOnUiThread(() -> {
+                        requireActivity().runOnUiThread(() -> {
+                            addCapturedThumb(bitmap);
+                            if (photoCount >= TOTAL_PHOTOS) {
+                                performAnalysis();
+                            } else {
                                 updateUI();
                                 binding.btnCapture.setEnabled(true);
-                            });
-                        }
+                            }
+                        });
                     }
 
                     @Override
@@ -216,6 +238,34 @@ public class CaptureFragment extends Fragment {
                         requireActivity().runOnUiThread(() -> binding.btnCapture.setEnabled(true));
                     }
                 });
+    }
+
+    private Bitmap imageProxyToBitmap(ImageProxy image) {
+        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+        byte[] bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, null);
+        
+        // Corregir rotación si es necesario
+        Matrix matrix = new Matrix();
+        matrix.postRotate(image.getImageInfo().getRotationDegrees());
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
+
+    private void addCapturedThumb(Bitmap bitmap) {
+        if (binding == null) return;
+        
+        ImageView iv = new ImageView(requireContext());
+        int size = (int) (60 * getResources().getDisplayMetrics().density);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(size, size);
+        lp.setMargins(8, 0, 8, 0);
+        iv.setLayoutParams(lp);
+        iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        iv.setImageBitmap(bitmap);
+        iv.setClipToOutline(true);
+        iv.setBackgroundResource(R.drawable.coin_overlay_border); // Un pequeño borde
+        
+        binding.capturedImagesContainer.addView(iv);
     }
 
     private void performAnalysis() {
